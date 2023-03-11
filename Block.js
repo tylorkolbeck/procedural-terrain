@@ -1,10 +1,12 @@
 
 
 class Block {
+  static fillPercent = 0.8
   on = true;
-  ON_COLOR = color(0, 0, 0);
-  OFF_COLOR = color(255, 255, 255);
-  FILL_PERCENT = 0.5;
+  OFF_COLOR = color(0, 0, 0);
+  ON_COLOR = color(255, 255, 255);
+  COLOR_GREEN = color(11, 170, 17);
+  COLOR_BLUE = color(50, 104, 204);
 
   constructor(x, y, width, height) {
     this.x = x;
@@ -14,12 +16,13 @@ class Block {
   }
 
   show() {
+    
     stroke(255);
-    strokeWeight(2);
+    strokeWeight(0);
     if (this.on) {
-      this.fill(this.ON_COLOR);
+      this.fill(this.COLOR_GREEN);
     } else {
-      this.fill(this.OFF_COLOR);
+      this.fill(this.COLOR_BLUE);
     }
     rect(this.x, this.y, this.w, this.h);
   }
@@ -29,6 +32,6 @@ class Block {
   }
 
   randomOnOff() {
-    this.on = random() < this.FILL_PERCENT ? true : false;
+    this.on = random() < Block.fillPercent ? true : false;
   }
 }

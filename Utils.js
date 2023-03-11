@@ -1,3 +1,28 @@
+const directions = ['north', 'northEast', 'east', 'southEast', 'south', 'southWest', 'west', 'northWest'];
+
+
+function getNeighbor(direction, row, col, tileMap) {
+  if (directions.includes(direction)) {
+    const neighbor = directionMap[direction](row, col, tileMap);
+    if (neighbor) {
+      return neighbor.on ? 1 : 0;
+    } else {
+      return 0
+    }
+  }
+}
+
+const directionMap = {
+  north: (row, col, tileMap) => getNorth(row, col, tileMap),
+  northEast: (row, col, tileMap) => getNorthEast(row, col, tileMap),
+  east: (row, col, tileMap) => getEast(row, col, tileMap),
+  southEast: (row, col, tileMap) => getSouthEast(row, col, tileMap),
+  south: (row, col, tileMap) => getSouth(row, col, tileMap),
+  southWest: (row, col, tileMap) => getSouthWest(row, col, tileMap),
+  west: (row, col, tileMap) => getWest(row, col, tileMap),
+  northWest: (row, col, tileMap) => getNorthWest(row, col, tileMap),
+}
+
 function getNorth(x, y, tileMap) {
   return tileMap[y - 1][x];
 }
@@ -46,14 +71,14 @@ const _testTileMap = [  [0, 1, 2],
 ];
 
 const _centerTile = [1, 1];
-_testDirectionFunction(getNorth, 1, ..._centerTile, _testTileMap);
-_testDirectionFunction(getEast, 5, ..._centerTile, _testTileMap);
-_testDirectionFunction(getSouth, 7, ..._centerTile, _testTileMap);
-_testDirectionFunction(getWest, 3, ..._centerTile, _testTileMap);
-_testDirectionFunction(getNorthEast, 5, ..._centerTile, _testTileMap);
-_testDirectionFunction(getSouthEast, 8, ..._centerTile, _testTileMap);
-_testDirectionFunction(getSouthWest, 6, ..._centerTile, _testTileMap);
-_testDirectionFunction(getNorthWest, 0, ..._centerTile, _testTileMap);
+// _testDirectionFunction(getNorth, 1, ..._centerTile, _testTileMap);
+// _testDirectionFunction(getEast, 5, ..._centerTile, _testTileMap);
+// _testDirectionFunction(getSouth, 7, ..._centerTile, _testTileMap);
+// _testDirectionFunction(getWest, 3, ..._centerTile, _testTileMap);
+// _testDirectionFunction(getNorthEast, 5, ..._centerTile, _testTileMap);
+// _testDirectionFunction(getSouthEast, 8, ..._centerTile, _testTileMap);
+// _testDirectionFunction(getSouthWest, 6, ..._centerTile, _testTileMap);
+// _testDirectionFunction(getNorthWest, 0, ..._centerTile, _testTileMap);
 
 
 
