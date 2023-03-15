@@ -5,7 +5,7 @@ class TileMap {
   seed = 0;
   blockSize;
 
-  static liveNeighborsRequired = 5;
+  static liveNeighborsRequired = 6;
 
   constructor(cols, rows, blockSize) {
     this.cols = cols;
@@ -21,7 +21,8 @@ class TileMap {
 
     for (let row = 0; row < this.rows; ++row) {
       for (let col = 0; col < this.cols; ++col) {
-        let liveCount = this.getNeighborLiveCount(row, col);
+        const currentCellOn = this.tileMap[row][col].on ? 1 : 0;
+        let liveCount = currentCellOn + this.getNeighborLiveCount(row, col);
         generation[row][col] = new Block(
           row * this.blockSize.width,
           col * this.blockSize.height,

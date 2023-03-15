@@ -33,11 +33,8 @@ let cols = 100;
 let tileMap = [];
 let BLOCK_WIDTH = 5;
 let BLOCK_HEIGHT = BLOCK_WIDTH;
-const ITERATIONS = 7;
+const ITERATIONS = 0;
 
-function generateHeight() {
-  return Math.round(Math.random() * 255);
-}
 
 const sleep = (millis) => { 
   return new Promise(resolve => setTimeout(resolve, millis)) 

@@ -23,8 +23,8 @@ const directionMap = {
   northWest: (row, col, tileMap) => getNorthWest(row, col, tileMap),
 }
 
-function getNorth(x, y, tileMap) {
-  return tileMap[y - 1][x];
+function getNorth(row, col, tileMap) {
+  return tileMap[col - 1][row];
 }
 
 function getEast(x, y, tileMap) {
