@@ -5,7 +5,9 @@ class Mover {
   cirRadius;
   mass;
   debug = false;
-  hasGravity = true;
+  hasGravity = false;
+
+  fillColor = color(255)
 
   constructor(x = 0, y = 0, cirRadius = 16, mass = 1) {
     this.location = createVector(x, y);
@@ -36,8 +38,8 @@ class Mover {
     // this._gravityLike()
     // this._randomAcceleration();
     // this._accelerateTowardsMouse();
-
-    this.checkEdges();
+    this.wrapAroundEdges();
+    // this.containInEdges();
     this.move();
 
     if (this.debug) {
@@ -47,7 +49,7 @@ class Mover {
 
   draw() {
     stroke(0);
-    fill(255);
+    fill(this.fillColor);
     ellipse(
       this.location.x,
       this.location.y,
@@ -83,7 +85,36 @@ class Mover {
     this.debug = !this.debug;
   }
 
-  checkEdges() {
+  attract(mover) {
+    let force = p5.Vector.sub(this.location, mover.location)
+    let distanceSqr = constrain(force.magSq(), 50, 1000);
+
+    let gravity = 25;
+    let strength = gravity * ((this.mass * mover.mass) / distanceSqr) 
+    force.setMag(strength);
+
+    mover.applyForce(force);
+  }
+
+  wrapAroundEdges() {
+    if (this.location.x > width) {
+      this.location.x = 0;
+    }
+
+    if (this.location.x < 0) {
+      this.location.x = width
+    }
+
+    if (this.location.y > height) {
+      this.location.y = 0;
+    }
+
+    if (this.location.y < 0) {
+      this.location.y = height;
+    }
+  }
+
+  containInEdges() {
     if (
       this.location.x > width - this.cirRadius ||
       this.location.x < 0 + this.cirRadius
