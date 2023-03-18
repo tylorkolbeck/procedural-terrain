@@ -6,14 +6,16 @@ class Grid {
   gridBuffer;
   gridImage;
 
+  scale = 1;
+
   plotPoints = [];
 
   constructor(cellSize, options) {
     if (!cellSize) throw new Error("Must provide a cell size to the new grid");
 
     this.gridColor = options?.gridColor ? options.gridColor : color(100);
-    this.backgroundColor = options?.background ? options.background : color(20);
-    this.origin = options?.origin ? options.origin : { x: 0, y: 0 };
+    this.backgroundColor = options?.background ? options.background : color(200);
+    this.origin = options?.origin ? options.origin : { x: width / 2, y: height / 2 };
 
     this.cellSize = cellSize;
   }
@@ -26,35 +28,37 @@ class Grid {
       image(this.gridBuffer, 0, 0);
     }
 
-    // this.drawMouseLines();
+    this.drawMouseLines();
     this.drawMouseCoordinates();
     push();
-    translate(this.origin.x, this.origin.y);
-
-    this.showPoints();
     pop();
 
     this.drawCenterLines();
   }
 
-  plot(point) {
-    this.plotPoints.push(point);
+  plot(points, fill) {
+    if (Array.isArray(points)) {
+      fill = fill ? fill : color(255)
+      this.showPoints(points, fill)
+    }
   }
 
-  showPoints() {
+  showPoints(points, color) {
     push();
+    translate(this.origin.x, this.origin.y);
     scale(1, -1);
-    fill(255, 255, 0);
-    stroke(100, 200, 3)
-    this.plotPoints.forEach((p) =>
-      ellipse(p.x * this.cellSize, p.y * this.cellSize, 5, 5)
+    fill(color);
+    stroke(100)
+    points.forEach((p) =>
+      ellipse(p.x * this.cellSize / this.scale, p.y * this.cellSize / this.scale, 5, 5)
     );
     pop();
   }
 
   drawCenterLines() {
     push();
-    stroke(200);
+    strokeWeight(2);
+    stroke(this.gridColor);
     // vertical center
     line(width / 2, 0, width / 2, height);
 
@@ -71,7 +75,9 @@ class Grid {
 
   drawMouseLines() {
     push();
-    stroke(0, 200, 200);
+    stroke(254, 86, 0);
+    strokeWeight(2);
+
     let closestVertical = Math.round(mouseX / this.cellSize) * this.cellSize;
     let closestHorizontal = Math.round(mouseY / this.cellSize) * this.cellSize;
 
