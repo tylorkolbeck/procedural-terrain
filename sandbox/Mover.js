@@ -9,52 +9,39 @@ class Mover {
 
   fillColor = color(255)
 
-  constructor(x = 0, y = 0, cirRadius = 16, mass = 1) {
+  constructor(x, y, vx, vy, mass = 1) {
     this.location = createVector(x, y);
-    this.velocity = createVector(0, 0);
+    this.velocity = createVector(vx, vy);
     this.accleration = createVector(0, 0);
-    this.cirRadius = sqrt(mass) * 10;
     this.mass = mass;
+    this.cirRadius = sqrt(this.mass) * 2;
   }
 
   render() {
     this.update();
+    // this.move();
     this.draw();
   }
 
-  _genRandomAccelVector() {
-    return createVector(random(-0.01, 0.01), random(-0.01, 0.01));
-  }
-
-  applyGravity() {
-    if (this.hasGravity) {
-      let moverWeight = p5.Vector.mult(GRAVITY, this.mass)
-      this.applyForce(moverWeight)
-    }
-  }
-
   update() {
+    if (this.debug) {
+      this.runDebug();
+    }
     //  Run acceleration aglorithms
     // this._gravityLike()
     // this._randomAcceleration();
     // this._accelerateTowardsMouse();
     this.wrapAroundEdges();
     // this.containInEdges();
-    this.move();
-
-    if (this.debug) {
-      this.runDebug();
-    }
   }
 
   draw() {
-    stroke(0);
+    stroke(100);
     fill(this.fillColor);
     ellipse(
       this.location.x,
       this.location.y,
-      this.cirRadius * 2,
-      this.cirRadius * 2
+      this.cirRadius * 3
     );
   }
 
@@ -70,13 +57,10 @@ class Mover {
     if (Array.isArray(forceVector)) {
       forceVector.forEach((f) => {
         let forceWithMass = p5.Vector.div(f, this.mass);
-
         this.accleration.add(forceWithMass);
       });
     } else {
       let forceWithMass = p5.Vector.div(forceVector, this.mass);
-
-
       this.accleration.add(forceWithMass);
     }
   }
@@ -87,9 +71,8 @@ class Mover {
 
   attract(mover) {
     let force = p5.Vector.sub(this.location, mover.location)
-    let distanceSqr = constrain(force.magSq(), 50, 1000);
-
-    let gravity = 25;
+    let distanceSqr = constrain(force.magSq(), 100, 1000);
+    let gravity = 10;
     let strength = gravity * ((this.mass * mover.mass) / distanceSqr) 
     force.setMag(strength);
 
@@ -154,11 +137,18 @@ class Mover {
     this._showVelocity();
   }
 
+  applyGravity() {
+    if (this.hasGravity) {
+      let moverWeight = p5.Vector.mult(GRAVITY, this.mass)
+      this.applyForce(moverWeight)
+    }
+  }
+
   _showVelocity() {
     stroke(254, 172, 0);
     Util.drawArrow(
       this.location,
-      Util.getFuturePosVec(this.location, this.velocity).mult(10)
+      Util.getFuturePosVec(this.location, this.velocity).mult(20)
     );
   }
 
@@ -191,5 +181,9 @@ class Mover {
     this.accleration = newAccleration;
 
     this.velocity.limit(2);
+  }
+
+  _genRandomAccelVector() {
+    return createVector(random(-0.01, 0.01), random(-0.01, 0.01));
   }
 }
