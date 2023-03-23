@@ -1,7 +1,9 @@
 const SIZE_SQR = 800;
-const NUM_MOVERS = 100;
+const NUM_MOVERS = 10;
 const NUM_ATTRACTORS = 1;
 let GRAVITY;
+
+let sun
 
 const movers = [];
 
@@ -9,22 +11,16 @@ let attractors = [];
 
 let mousedown = false;
 
-function populateAttractors() {
-  for (let i = 0; i < NUM_ATTRACTORS; i++) {
-    const attractor = new Mover(width / 2, height / 2, random(10, 15));
-    attractor.fillColor = color(255, 0, 0);
-    attractors.push(attractor);
-  }
-}
-
 function populateMovers() {
-  for (let i = 0; i < NUM_MOVERS; i++) {
-    // let loc = p5.Vector.random2D();
-    // loc.setMag(random(100, 150));
-    
-    // const v = p5.Vector.random2D();
-    let mover = new Mover(random(0, width/ 2), random(0, height / 2),0, 0, random(10, 100))
-    mover.debug = true;
+  for (let i = 0; i < NUM_MOVERS; i++) {   
+    const positionVector = p5.Vector.random2D();
+    const vel = positionVector.copy();
+    positionVector.setMag(random(200,300))
+    // vel.rotate(PI/2)
+    vel.setMag(random(5, 15))
+    // console.log(vel)
+    let mover = new Mover(positionVector.x, positionVector.y, vel.x, vel.y, 50)
+    // mover.debug = true;
     // mover.velocity = createVector(10, 10)
     // console.log(mover.location)
     movers.push(mover)
@@ -51,6 +47,8 @@ function setup() {
   cnv.mousePressed(() => (mousedown = true));
   cnv.mouseReleased(() => (mousedown = false));
 
+  sun = new Mover(0,0,0,0, 500);
+
   populateMovers();
   // populateAttractors();
 }
@@ -60,6 +58,7 @@ function draw() {
   const wind = createVector(1, 0);
 
   for (let i =0; i < movers.length; i++) {
+    sun.attract(movers[i])
     for (let j = 0; j < movers.length; j++) {
       if (movers[i] !== movers[j]) {
         movers[i].attract(movers[j]);
@@ -68,13 +67,10 @@ function draw() {
     }
   }
 
-  // translate(width / 2, height /2)
-
+  ellipse(-200, -200, 20, 20)
+  translate(width / 2, height / 2)
   movers.forEach((mover, i) => {
-    mover.applyGravity();
-    if (mousedown) {
-      mover.applyForce(wind);
-    }
     mover.render();
   });
+  // sun.render()
 }
