@@ -1,5 +1,5 @@
 const SIZE_SQR = 800;
-const NUM_MOVERS = 400;
+const NUM_MOVERS = 100;
 const NUM_ATTRACTORS = 1;
 let GRAVITY;
 
@@ -19,11 +19,11 @@ function populateAttractors() {
 
 function populateMovers() {
   for (let i = 0; i < NUM_MOVERS; i++) {
-    let loc = p5.Vector.random2D();
-    loc.setMag(random(100, 150));
+    // let loc = p5.Vector.random2D();
+    // loc.setMag(random(100, 150));
     
-    const v = p5.Vector.random2D();
-    let mover = new Mover(loc.x, loc.y, v.x, v.y, 50)
+    // const v = p5.Vector.random2D();
+    let mover = new Mover(random(0, width/ 2), random(0, height / 2),0, 0, random(10, 100))
     mover.debug = true;
     // mover.velocity = createVector(10, 10)
     // console.log(mover.location)
@@ -57,22 +57,24 @@ function setup() {
 
 function draw() {
   background(100);
-  const wind = createVector(0.1, 0);
+  const wind = createVector(1, 0);
 
-  // for (let i =0; i < movers.length; i++) {
-  //   for (let j = 0; j < movers.length; j++) {
-  //     if (movers[i] !== movers[j]) {
-  //       movers[i].attract(movers[j]);
-  //       stroke(1)
-  //     }
-  //   }
-  // }
+  for (let i =0; i < movers.length; i++) {
+    for (let j = 0; j < movers.length; j++) {
+      if (movers[i] !== movers[j]) {
+        movers[i].attract(movers[j]);
+        stroke(1)
+      }
+    }
+  }
 
-  translate(width / 2, height /2)
+  // translate(width / 2, height /2)
 
   movers.forEach((mover, i) => {
     mover.applyGravity();
-
+    if (mousedown) {
+      mover.applyForce(wind);
+    }
     mover.render();
   });
 }

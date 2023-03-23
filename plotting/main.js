@@ -30,8 +30,8 @@ function draw() {
   grid.render();
   // grid.plot(genPoints(X_VALUES, expo), color(255,0,0))
   // grid.plot(genPoints(X_VALUES, lin), color(200,200,0))
-  // grid.plot(genPoints(X_VALUES, logC), color(0,200,0))
-  grid.plot(genPoints(X_VALUES, sandbox), color(0,200,0))
+  grid.plot(genPoints(X_VALUES, logC), color(0,200,0))
+  // grid.plot(genPoints(X_VALUES, sandbox), color(0,200,0))
 }
 
 function createNumRange() {

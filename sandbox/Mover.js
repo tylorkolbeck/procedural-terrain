@@ -5,7 +5,7 @@ class Mover {
   cirRadius;
   mass;
   debug = false;
-  hasGravity = false;
+  hasGravity = true;
 
   fillColor = color(255)
 
@@ -19,7 +19,7 @@ class Mover {
 
   render() {
     this.update();
-    // this.move();
+    this.move();
     this.draw();
   }
 
@@ -31,8 +31,8 @@ class Mover {
     // this._gravityLike()
     // this._randomAcceleration();
     // this._accelerateTowardsMouse();
-    this.wrapAroundEdges();
-    // this.containInEdges();
+    // this.wrapAroundEdges();
+    this.containInEdges();
   }
 
   draw() {
@@ -47,6 +47,7 @@ class Mover {
 
   move() {
     this.velocity.add(this.accleration);
+    // this.velocity.limit(100)
     this.location.add(this.velocity);
 
     // Set accleration to 0 after each frame to keep it from accumulating each frame
@@ -72,7 +73,7 @@ class Mover {
   attract(mover) {
     let force = p5.Vector.sub(this.location, mover.location)
     let distanceSqr = constrain(force.magSq(), 100, 1000);
-    let gravity = 10;
+    let gravity = 1;
     let strength = gravity * ((this.mass * mover.mass) / distanceSqr) 
     force.setMag(strength);
 

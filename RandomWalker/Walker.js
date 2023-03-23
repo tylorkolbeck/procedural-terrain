@@ -14,7 +14,7 @@ class Walker {
   }
 
   monteCarlo() {
-    const stepSize = random(0, 5);
+    const stepSize = random(0, 1);
     const stepX = random(-stepSize, stepSize);
     const stepY = random(-stepSize, stepSize);
 
