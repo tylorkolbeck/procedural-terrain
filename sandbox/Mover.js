@@ -9,17 +9,23 @@ class Mover {
 
   fillColor = color(255)
 
+  angle = 0;
+  angleV = 0;
+  angleA = 0;
+
   constructor(x, y, vx, vy, mass = 1) {
     this.location = createVector(x, y);
     this.velocity = createVector(vx, vy);
     this.accleration = createVector(0, 0);
+
     this.mass = mass;
     this.cirRadius = sqrt(this.mass) * 2;
+    // this.angleV = random(-0.2, 0.2)
   }
 
   render() {
     this.update();
-    // this.move();
+    this.move();
     this.draw();
   }
 
@@ -31,25 +37,40 @@ class Mover {
     // this._gravityLike()
     // this._randomAcceleration();
     // this._accelerateTowardsMouse();
-    this.wrapAroundEdges();
+    // this.wrapAroundEdges();
     // this.containInEdges();
   }
 
   draw() {
     stroke(100);
     fill(this.fillColor);
-    ellipse(
-      this.location.x,
-      this.location.y,
-      this.cirRadius * 3
-    );
+    stroke(this.fillColor)
+    // ellipse(
+    //   this.location.x,
+    //   this.location.y,
+    //   this.cirRadius * 3
+    // );
+    const lineLength = this.cirRadius * 6
+    push()
+    translate(this.location.x, this.location.y)
+    rotate(this.angle)
+    this.angle = this.velocity.heading()
+    // line(0, 0, lineLength, lineLength);
+    triangle(-this.cirRadius / 2, -this.cirRadius / 2, -this.cirRadius / 2, this.cirRadius, this.cirRadius, 0);
+    pop()
   }
 
   move() {
     this.velocity.add(this.accleration);
+    
     this.location.add(this.velocity);
 
+    // this.angleA = this.accleration.y / 200;
+    // this.angleV += this.angleA;
+    // this.angle += this.angleV;
+
     // Set accleration to 0 after each frame to keep it from accumulating each frame
+    this.angleA = 0;
     this.accleration.set(0, 0);
   }
 
@@ -72,7 +93,7 @@ class Mover {
   attract(mover) {
     let force = p5.Vector.sub(this.location, mover.location)
     let distanceSqr = constrain(force.magSq(), 100, 1000);
-    let gravity = 10;
+    let gravity = 1;
     let strength = gravity * ((this.mass * mover.mass) / distanceSqr) 
     force.setMag(strength);
 
@@ -148,7 +169,7 @@ class Mover {
     stroke(254, 172, 0);
     Util.drawArrow(
       this.location,
-      Util.getFuturePosVec(this.location, this.velocity).mult(20)
+      Util.getFuturePosVec(this.location, this.velocity).mult(100)
     );
   }
 
@@ -162,7 +183,7 @@ class Mover {
       this.accleration.sub(this._genRandomAccelVector());
     }
 
-    this.velocity.limit(2);
+    // this.velocity.limit(2);
   }
 
   _gravityLike() {
