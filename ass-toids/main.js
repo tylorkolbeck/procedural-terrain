@@ -12,6 +12,9 @@ let spriteSheet;
 
 let effectSprite;
 let shipSprite;
+let spaceStationSprite;
+
+let spaceStation;
 
 function preload() {
   vector = createVector;
@@ -30,12 +33,21 @@ function setEffectSprite() {
   effectSprite = spriteSheet.get(sLoc.x,sLoc.y, sLoc.width, sLoc.height);
 }
 
+function setSpaceStationSprite() {
+  const sLoc = spriteData.sprites.find(s => s.name === "spaceStation_024.png");
+  spaceStationSprite = spriteSheet.get(sLoc.x,sLoc.y, sLoc.width, sLoc.height);
+  spaceStationSprite.width /= 2;
+  spaceStationSprite.height /= 2;
+}
+
 function setup() {
   frameRate(60);
   backgroundImage = generateStarBackground();
   setRocketSprite()
   setEffectSprite()
+  setSpaceStationSprite()
   createCanvas(1200, 600);
+  spaceStation = new Mover(vector(width - (spaceStationSprite.width / 2 + 50), height - (spaceStationSprite.height / 2)), vector(0,0), spaceStationSprite);
   rocket = new Rocket(vector(width / 2, height / 2), vector(0, 0), 100, {ship: shipSprite, projectile: effectSprite});
 }
 
@@ -69,6 +81,9 @@ function draw() {
 
   rocket.update();
   rocket.draw();
+
+  spaceStation.update();
+  spaceStation.draw();
 }
 
 function generateStarBackground() {
