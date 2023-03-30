@@ -3,6 +3,11 @@ const CANVAS_HEIGHT = 600;
 let rocket;
 let vector;
 
+const DEBUG = false;
+
+let toids;
+const numToids = 6;
+
 const stars = [];
 numStars = 100;
 let backgroundImage;
@@ -13,14 +18,19 @@ let spriteSheet;
 let effectSprite;
 let shipSprite;
 let spaceStationSprite;
+let toidSprite;
 
 let spaceStation;
+let colliders;
 
 function preload() {
   vector = createVector;
 
   spriteData = loadJSON("ship_sprite.json");
   spriteSheet = loadImage("sprite_sheets/sprites.png");
+
+  colliders = new Colliders();
+
 }
 
 function setRocketSprite() {
@@ -33,6 +43,11 @@ function setEffectSprite() {
   effectSprite = spriteSheet.get(sLoc.x,sLoc.y, sLoc.width, sLoc.height);
 }
 
+function setMeteorSprite() {
+  const sLoc = spriteData.sprites.find(s => s.name === "spaceMeteors_001.png");
+  toidSprite = spriteSheet.get(sLoc.x, sLoc.y, sLoc.width, sLoc.height);
+}
+
 function setSpaceStationSprite() {
   const sLoc = spriteData.sprites.find(s => s.name === "spaceStation_024.png");
   spaceStationSprite = spriteSheet.get(sLoc.x,sLoc.y, sLoc.width, sLoc.height);
@@ -43,12 +58,17 @@ function setSpaceStationSprite() {
 function setup() {
   frameRate(60);
   backgroundImage = generateStarBackground();
-  setRocketSprite()
-  setEffectSprite()
-  setSpaceStationSprite()
+  setRocketSprite();
+  setEffectSprite();
+  setSpaceStationSprite();
+  setMeteorSprite();
   createCanvas(1200, 600);
+  toids = generateToids(numToids, toidSprite);
+  colliders.add(toids);
+
   spaceStation = new Mover(vector(width - (spaceStationSprite.width / 2 + 50), height - (spaceStationSprite.height / 2)), vector(0,0), spaceStationSprite);
   rocket = new Rocket(vector(width / 2, height / 2), vector(0, 0), 100, {ship: shipSprite, projectile: effectSprite});
+  rocket.boundCheck = loopBounds;
 }
 
 function keyReleased(event) {
@@ -60,30 +80,37 @@ function keyReleased(event) {
 function draw() {
   background(0);
   image(backgroundImage, 0, 0, width, height);
-  if (keyIsDown(LEFT_ARROW)) {
+  if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) {
     rocket.rotate("LEFT");
   }
 
-  if (keyIsDown(RIGHT_ARROW)) {
+  if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) {
     rocket.rotate("RIGHT");
   }
 
-  if (keyIsDown(UP_ARROW)) {
+  if (keyIsDown(UP_ARROW) || keyIsDown(87)) {
     rocket.applyThrust();
   }
 
-  if (keyIsDown(DOWN_ARROW)) {
+  if (keyIsDown(DOWN_ARROW) ) {
   }
 
   if (keyIsDown(32)) {
     rocket.fireProjectile();
   }
 
+  renderToids(toids);
+
   rocket.update();
   rocket.draw();
 
   spaceStation.update();
   spaceStation.draw();
+
+  const collision = colliders.checkCollision(rocket);
+  if (collision) {
+    frameRate(0)
+  }
 }
 
 function generateStarBackground() {
@@ -105,4 +132,40 @@ function generateStarBackground() {
   pop();
 
   return bg;
+}
+
+
+//  **** ASTEROID FUNCTIONS
+function renderToids(toids) {
+  toids.forEach(t => t.draw());
+}
+
+function generateToids(num, toidSprite) {
+  const toids = [];
+  for (let i = 0; i < num; i++) {
+    const t = new Toid(random(50, 150), vector(random(width), random(height)), toidSprite)
+    t.setBoundsCheck(loopBounds)
+    toids.push(t);
+  }
+
+  return toids;
+}
+
+
+function loopBounds(locationVector) {
+  if (locationVector.x > width) {
+    locationVector.x = 0
+  }
+
+  if (locationVector.x < 0) {
+    locationVector.x = width
+  }
+
+  if (locationVector.y > height) {
+    locationVector.y = 0;
+  }
+
+  if (locationVector.y < 0) {
+    locationVector.y = height
+  }
 }

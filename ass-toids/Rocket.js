@@ -18,26 +18,35 @@ class Rocket {
   fireInterval;
 
   rotateFactor = 0.005;
-  thrustFactor = 0.05;
+  thrustFactor = 0.08;
 
   projectiles = new Projectiles();
   sprites;
+
+  boundCheck = null;
+
+  hitBoxRadius;
 
   constructor(location, velocity, mass, sprites) {
     this.location = location.copy();
     this.velocity = velocity ? velocity : vector(0, 0);
     this.acceleration = vector(0, 0);
     this.mass = mass;
-    this.r = sqrt(this.mass) * 2;
+    // this.r = sqrt(this.mass) * 2;
+    this.r = 20;
     this.fuel = this.startingFuel;
     this.sprites = sprites;
+    this.hitBoxRadius = this.r * 2;
   }
 
   draw() {
     this.drawShip();
-    // this.drawDeadReckon()
     this.drawHud();
     this.drawFuelBar();
+
+    if (DEBUG) {
+      this.drawDebug();
+    }
   }
 
   drawShip() {
@@ -46,18 +55,16 @@ class Rocket {
     translate(this.location.x, this.location.y);
     rotate(this.angle + 1.57);
     image(this.sprites.ship, 0, 0, 40, 40);
-
     // triangle(-this.r, -this.r / 2, -this.r, this.r / 2, this.r, 0);
     pop();
     // push()
     // imageMode(CENTER);
-    
+
     // translate(this.location.x, this.location.y);
     // rotate(PI / 4);
     // image(this.sprite, 0, 0, 40, 40);
 
     // pop()
-
   }
 
   drawDeadReckon() {
@@ -101,9 +108,11 @@ class Rocket {
     switch (direction) {
       case "LEFT":
         this.angleAcceleration -= this.rotateFactor * deltaTime;
+        this.acceleration.add(p5.Vector.fromAngle(this.angleAcceleration)).mult(0.01) // add a small amount of reciprical thrust acceleration
         break;
       case "RIGHT":
         this.angleAcceleration += this.rotateFactor * deltaTime;
+        this.acceleration.add(p5.Vector.fromAngle(this.angleAcceleration)).mult(-1).mult(0.01) // add a small amount of reciprical thrust acceleration
         break;
     }
   }
@@ -115,13 +124,21 @@ class Rocket {
   fireProjectile() {
     if (!this.firing) {
       this.projectiles.add(
-        new Mover(this.location.copy(), p5.Vector.fromAngle(this.angle), this.sprites.projectile)
+        new Mover(
+          this.location.copy(),
+          p5.Vector.fromAngle(this.angle),
+          this.sprites.projectile
+        )
       );
 
       this.firing = true;
       this.fireInterval = setInterval(() => {
         this.projectiles.add(
-          new Mover(this.location.copy(), p5.Vector.fromAngle(this.angle), this.sprites.projectile)
+          new Mover(
+            this.location.copy(),
+            p5.Vector.fromAngle(this.angle),
+            this.sprites.projectile
+          )
         );
       }, this.fireRate);
     }
@@ -141,6 +158,30 @@ class Rocket {
 
     this.angleAcceleration = 0;
     this.acceleration.set(0, 0);
+
+    if (this.boundCheck) {
+      this.boundCheck(this.location);
+    }
+
+    this.applyDrag();
     this.projectiles.render();
+  }
+
+  applyDrag() {
+    this.velocity.mult(0.99);
+  }
+
+  drawDebug() {
+    this.drawDeadReckon()
+
+    this.drawHitbox();
+  }
+
+  drawHitbox() {
+    push();
+    stroke(color(255, 100, 0));
+    noFill();
+    ellipse(this.location.x, this.location.y, this.hitBoxRadius);
+    pop();
   }
 }
