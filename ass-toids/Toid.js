@@ -10,8 +10,6 @@ class Toid {
   boundsCheck = null;
   rotation;
 
-  
-
   constructor(r, location, toidSprite) {
     this.rotation = random(TWO_PI);
 

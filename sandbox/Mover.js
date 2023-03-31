@@ -61,6 +61,7 @@ class Mover {
     pop()
   }
 
+
   move() {
     this.velocity.add(this.accleration);
     

@@ -20,4 +20,15 @@ class Projectiles {
       p.draw();
     }
   }
+
+  checkCollision(colliders) {
+    for (let [id, p] of this.projectiles) {
+      if (colliders.checkCollision(p, (collider, colliders) => {
+        colliders.delete(collider.id)
+
+      })) {
+        this.projectiles.delete(p.id);
+      }
+    } 
+  }
 }

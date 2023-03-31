@@ -5,6 +5,7 @@ class Rocket {
   angle = PI / 2;
   angleVelocity;
   mass;
+  tag = "Rocket";
   r;
   angleAcceleration = 0;
   deadreckonVector;
@@ -108,11 +109,16 @@ class Rocket {
     switch (direction) {
       case "LEFT":
         this.angleAcceleration -= this.rotateFactor * deltaTime;
-        this.acceleration.add(p5.Vector.fromAngle(this.angleAcceleration)).mult(0.01) // add a small amount of reciprical thrust acceleration
+        this.acceleration
+          .add(p5.Vector.fromAngle(this.angleAcceleration))
+          .mult(0.01); // add a small amount of reciprical thrust acceleration
         break;
       case "RIGHT":
         this.angleAcceleration += this.rotateFactor * deltaTime;
-        this.acceleration.add(p5.Vector.fromAngle(this.angleAcceleration)).mult(-1).mult(0.01) // add a small amount of reciprical thrust acceleration
+        this.acceleration
+          .add(p5.Vector.fromAngle(this.angleAcceleration))
+          .mult(-1)
+          .mult(0.01); // add a small amount of reciprical thrust acceleration
         break;
     }
   }
@@ -123,22 +129,25 @@ class Rocket {
 
   fireProjectile() {
     if (!this.firing) {
-      this.projectiles.add(
-        new Mover(
+      const p = new Mover(
+        this.location.copy(),
+        p5.Vector.fromAngle(this.angle),
+        this.sprites.projectile
+      );
+
+      p.setTag("PROJECTILE");
+      this.projectiles.add(p);
+
+      this.firing = true;
+      this.fireInterval = setInterval(() => {
+        const p = new Mover(
           this.location.copy(),
           p5.Vector.fromAngle(this.angle),
           this.sprites.projectile
         )
-      );
-
-      this.firing = true;
-      this.fireInterval = setInterval(() => {
+        p.setTag()
         this.projectiles.add(
-          new Mover(
-            this.location.copy(),
-            p5.Vector.fromAngle(this.angle),
-            this.sprites.projectile
-          )
+          p
         );
       }, this.fireRate);
     }
@@ -164,6 +173,7 @@ class Rocket {
     }
 
     this.applyDrag();
+    this.projectiles.checkCollision(asteroidColliders);
     this.projectiles.render();
   }
 
@@ -172,7 +182,7 @@ class Rocket {
   }
 
   drawDebug() {
-    this.drawDeadReckon()
+    this.drawDeadReckon();
 
     this.drawHitbox();
   }

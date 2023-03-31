@@ -4,6 +4,8 @@ class Mover {
   velocity;
   acceleration;
   sprite;
+  hitBoxRadius = 5;
+  tag = "MOVER"
 
   constructor(location, velocity, sprite = null) {
     this.id = Symbol();
@@ -18,12 +20,10 @@ class Mover {
     fill(255);	
     stroke(10,200,50)
 
-    const dr = this.velocity.copy().mult(2);
-    // line(this.location.x, this.location.y, this.location.x + dr.x, this.location.y + dr.y);
+  
     if (this.sprite) {
       imageMode(CENTER);
       translate(this.location.x, this.location.y);
-      // console.log(this.velocity.heading())
       rotate(this.velocity.heading()-  1.57) 
       image(this.sprite, 0, 0, this.sprite.width, this.sprite.height);
     } else {
@@ -44,10 +44,16 @@ class Mover {
     return false;
   }
 
+  setTag(tag) {
+    this.tag = tag;
+  }
+
   update() {
     this.velocity.add(this.acceleration);
     this.location.add(this.velocity);
 
     this.acceleration.set(0,0);
   }
+
+
 }

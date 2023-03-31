@@ -3,10 +3,12 @@ const CANVAS_HEIGHT = 600;
 let rocket;
 let vector;
 
-const DEBUG = false;
+let DEBUG = true;
 
 let toids;
 const numToids = 6;
+
+let level = 1;
 
 const stars = [];
 numStars = 100;
@@ -17,11 +19,11 @@ let spriteSheet;
 
 let effectSprite;
 let shipSprite;
-let spaceStationSprite;
 let toidSprite;
 
-let spaceStation;
-let colliders;
+let asteroidSpeedFactor = 1;
+
+let asteroidColliders;
 
 function preload() {
   vector = createVector;
@@ -29,8 +31,7 @@ function preload() {
   spriteData = loadJSON("ship_sprite.json");
   spriteSheet = loadImage("sprite_sheets/sprites.png");
 
-  colliders = new Colliders();
-
+  asteroidColliders = new Colliders('ASTEROID');
 }
 
 function setRocketSprite() {
@@ -48,25 +49,16 @@ function setMeteorSprite() {
   toidSprite = spriteSheet.get(sLoc.x, sLoc.y, sLoc.width, sLoc.height);
 }
 
-function setSpaceStationSprite() {
-  const sLoc = spriteData.sprites.find(s => s.name === "spaceStation_024.png");
-  spaceStationSprite = spriteSheet.get(sLoc.x,sLoc.y, sLoc.width, sLoc.height);
-  spaceStationSprite.width /= 2;
-  spaceStationSprite.height /= 2;
-}
-
 function setup() {
   frameRate(60);
   backgroundImage = generateStarBackground();
   setRocketSprite();
   setEffectSprite();
-  setSpaceStationSprite();
   setMeteorSprite();
-  createCanvas(1200, 600);
-  toids = generateToids(numToids, toidSprite);
-  colliders.add(toids);
+  createCanvas(window.innerWidth, window.innerHeight);
 
-  spaceStation = new Mover(vector(width - (spaceStationSprite.width / 2 + 50), height - (spaceStationSprite.height / 2)), vector(0,0), spaceStationSprite);
+  asteroidColliders.set(generateAsteroids(numToids, toidSprite, asteroidSpeedFactor));
+
   rocket = new Rocket(vector(width / 2, height / 2), vector(0, 0), 100, {ship: shipSprite, projectile: effectSprite});
   rocket.boundCheck = loopBounds;
 }
@@ -78,6 +70,8 @@ function keyReleased(event) {
 }
 
 function draw() {
+
+
   background(0);
   image(backgroundImage, 0, 0, width, height);
   if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) {
@@ -99,18 +93,26 @@ function draw() {
     rocket.fireProjectile();
   }
 
-  renderToids(toids);
+  if (asteroidColliders.colliders.size === 0) {
+    level++;
+    asteroidSpeedFactor += 0.2;
+    asteroidColliders.set(generateAsteroids(numToids, toidSprite, asteroidSpeedFactor));
+  }
+  renderGameObjects(asteroidColliders.colliders);
 
   rocket.update();
   rocket.draw();
 
-  spaceStation.update();
-  spaceStation.draw();
 
-  const collision = colliders.checkCollision(rocket);
-  if (collision) {
+  if (asteroidColliders.checkCollision(rocket)) {
     frameRate(0)
   }
+
+  push()
+  fill(255, 0, 0)
+  textSize(20)
+  text("Level: " + level, (width / 2) - 100, 20);
+  pop()
 }
 
 function generateStarBackground() {
@@ -134,21 +136,29 @@ function generateStarBackground() {
   return bg;
 }
 
-
 //  **** ASTEROID FUNCTIONS
-function renderToids(toids) {
-  toids.forEach(t => t.draw());
+function renderGameObjects(gameObjectMap) {
+  for (let [id, o] of gameObjectMap) {
+    o.update();
+    o.draw();
+
+    if (DEBUG) {
+      o.debugDraw()
+    }
+  }
 }
 
-function generateToids(num, toidSprite) {
-  const toids = [];
+function generateAsteroids(num, toidSprite, speedFactor) {
+  const asteroidMap = new Map();
   for (let i = 0; i < num; i++) {
-    const t = new Toid(random(50, 150), vector(random(width), random(height)), toidSprite)
-    t.setBoundsCheck(loopBounds)
-    toids.push(t);
+    const diameter = random(40, 150);
+    const t = new GameObject(vector(diameter * -1, random(0, height)), 0, diameter, toidSprite);
+    t.setVelocity(vector(random(speedFactor * -1, speedFactor), random(speedFactor * -1, speedFactor)));
+    t.attatchHitBox(new RoundHitBox(diameter, "ASTROID"));
+    t.setBoundsCheck(loopBounds);
+    asteroidMap.set(t.id, t);
   }
-
-  return toids;
+  return asteroidMap;
 }
 
 
