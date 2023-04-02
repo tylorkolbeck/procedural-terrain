@@ -3,7 +3,7 @@ const CANVAS_HEIGHT = 600;
 let rocket;
 let vector;
 
-let DEBUG = false;
+let DEBUG = true;
 
 let toids;
 const numToids = 6;
@@ -20,6 +20,7 @@ let spriteSheet;
 let effectSprite;
 let shipSprite;
 let toidSprite;
+let thrustSprite;
 
 let asteroidSpeedFactor = 1;
 let asteroidColliders;
@@ -37,6 +38,13 @@ function preload() {
       DEBUG = !DEBUG;
     }
 
+    // check for spacebar key press
+
+    if (e.key === 32) {
+      debugger;
+      e.preventDefault();
+    }
+
     if (e.key === "n") {
       gameOver = false;
       setupGame();
@@ -45,8 +53,15 @@ function preload() {
 }
 
 function setRocketSprite() {
-  const sLoc = spriteData.sprites.find((s) => s.name === "spaceShips_007.png");
+  const sLoc = spriteData.sprites.find((s) => s.name === "spaceShips_009.png");
   shipSprite = spriteSheet.get(sLoc.x, sLoc.y, sLoc.width, sLoc.height);
+}
+
+function setThrustSprite() {
+  const sLoc = spriteData.sprites.find(
+    (s) => s.name === "spaceEffects_003.png"
+  );
+  thrustSprite = spriteSheet.get(sLoc.x, sLoc.y, sLoc.width, sLoc.height);
 }
 
 function setEffectSprite() {
@@ -63,39 +78,10 @@ function setMeteorSprite() {
   toidSprite = spriteSheet.get(sLoc.x, sLoc.y, sLoc.width, sLoc.height);
 }
 
-let spriteObj;
-let imagesPerRow = 25;
-let cellSize = 50;
-
 function setup() {
-  // spriteData.sprites.forEach((s, i)=> {
-  //   if (i < numSprites)
-  //     canvasWidth += parseInt(s.width)
-  // })
-  const cavasHeight = cellSize * ceil(spriteData.sprites.length / imagesPerRow);
-
-  createCanvas(imagesPerRow * cellSize, cavasHeight + 100);
-  spriteObj = new SpriteSheet(spriteSheet, spriteData);
-  console.log(spriteData.sprites.length);
-  spriteObj.generateImages();
-
-  // spriteObj.images.forEach((img, i) => {
-  //   if (img.height > rowHeight) {
-  //     rowHeight = img.height
-  //   }
-
-  //   image(img, xLoc, rowHeight)
-  //   xLoc += parseInt(img.width)
-
-  //   if (i % perRow === 0) {
-  //     xLoc = 0;
-  //     row++;
-  //     rowHeight = 0;
-  //   }
-  // })
-
-  // frameRate(60);
-  // setupGame();
+  createCanvas(1200, 1200);
+  frameRate(60);
+  setupGame();
 }
 
 function keyReleased(event) {
@@ -104,97 +90,85 @@ function keyReleased(event) {
   }
 }
 
-let currentHoveredSprite = null;
+let frameRates = [];
+let averageFrameRate = 0;
+let lowestAverage = 1000;
+
+function trackFrameRate(frameRate) {
+  const averageOver = 10;
+
+  if (frameRates.length > averageOver) {
+    frameRates.shift();
+    frameRates.push(frameRate)
+  } else {
+    frameRates.push(frameRate);
+  }
+
+  averageFrameRate = frameRates.reduce((a, b) => a + b, 0) / frameRates.length;
+  if (averageFrameRate < lowestAverage && averageFrameRate > 0 && frameRates.length > averageOver) {
+    lowestAverage = averageFrameRate;
+  }
+}
 
 function draw() {
-  background(255);
+  background(0);
+  trackFrameRate(frameRate());
 
-  let imageIndex = 0;
-  let yLoc = 0;
-  for (let r = 0; r < spriteData.sprites.length / imagesPerRow; r++) {
-    let xLoc = 0;
-    for (let c = 0; c < imagesPerRow; c++) {
-      let img = spriteObj.images[imageIndex]
-      if (!img) {
-        break
-      }
-      rect(xLoc, yLoc, cellSize, cellSize);
-      image(img, xLoc, yLoc, cellSize, cellSize, 0, 0, img.width, img.height, CONTAIN);
-      xLoc += 50;
-      imageIndex++
-    }
-    yLoc += 50;
+  if (gameOver) {
+    frameRate(0);
   }
 
-  let cellX = floor(mouseX / cellSize);
-  let cellY = floor(mouseY / cellSize);
-  let cellIndex = cellY * imagesPerRow + cellX;
-  let hoveredSprite = spriteData.sprites[cellIndex];
-  if (hoveredSprite) {
-    currentHoveredSprite = hoveredSprite;
-    push()
-    noFill()
-    stroke(color(255, 0, 0))
-    fill(255, 100, 0, 20);
-    rect(cellX * cellSize, cellY * cellSize, cellSize, cellSize)
-    // line(cellX * cellSize, 0, cellX * cellSize, height)
-    // line(0, cellSize * cellY, width, cellSize * cellY)
-    pop()
-    textAlign(CENTER)
-    text(hoveredSprite.name, width / 2, height - 20)
-    image(spriteObj.images[cellIndex], mouseX, mouseY, 100, 100)
+  image(backgroundImage, 0, 0, width, height);
+  checkKeyDowns();
+
+  if (asteroidColliders.colliders.size === 0) {
+    level++;
+    asteroidSpeedFactor += 0.2;
+    asteroidColliders.set(
+      generateAsteroids(numToids, toidSprite, asteroidSpeedFactor)
+    );
   }
-  // spriteObj.draw();
+  renderGameObjects(asteroidColliders.colliders);
 
-  // if (gameOver) {
-  //   frameRate(0);
-  // }
+  rocket.update();
+  rocket.draw();
 
-  // background(0);
-  // image(backgroundImage, 0, 0, width, height);
-  // if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) {
-  //   rocket.rotate("LEFT");
-  // }
+  if (asteroidColliders.checkCollision(rocket)) {
+    push();
+    textAlign(CENTER);
+    textSize(100);
+    fill(255, 0, 0);
+    text("GAME OVER ", width / 2, height / 2);
+    pop();
+    gameOver = true;
+  }
 
-  // if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) {
-  //   rocket.rotate("RIGHT");
-  // }
+  push();
+  fill(255, 0, 0);
+  textSize(20);
+  text("Level: " + level, width / 2 - 100, 20);
+  pop();
+}
 
-  // if (keyIsDown(UP_ARROW) || keyIsDown(87)) {
-  //   rocket.applyThrust();
-  // }
+function checkKeyDowns() {
+  if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) {
+    rocket.rotate("LEFT");
+  }
 
-  // if (keyIsDown(DOWN_ARROW)) {
-  // }
+  if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) {
+    rocket.rotate("RIGHT");
+  }
 
-  // if (keyIsDown(32)) {
-  //   rocket.fireProjectile();
-  // }
+  if (keyIsDown(UP_ARROW) || keyIsDown(87)) {
+    rocket.applyThrust();
+  }
 
-  // if (asteroidColliders.colliders.size === 0) {
-  //   level++;
-  //   asteroidSpeedFactor += 0.2;
-  //   asteroidColliders.set(
-  //     generateAsteroids(numToids, toidSprite, asteroidSpeedFactor)
-  //   );
-  // }
-  // renderGameObjects(asteroidColliders.colliders);
+  if (keyIsDown(DOWN_ARROW)) {
+  }
 
-  // rocket.update();
-  // rocket.draw();
-
-  // if (asteroidColliders.checkCollision(rocket)) {
-  //   textSize(200)
-  //   fill(255, 0, 0);
-  //   text("GAME OVER ", width / 2 - 500, height / 2)
-  //   gameOver = true;
-  // }
-
-  // push();
-  // fill(255, 0, 0);
-  // textSize(20);
-  // text("Level: " + level, width / 2 - 100, 20);
-  // pop();
+  if (keyIsDown(32)) {
+    rocket.fireProjectile();
+  }
 }
 
 function generateStarBackground() {
@@ -271,15 +245,20 @@ function loopBounds(locationVector) {
   }
 }
 
+function initializeSprites() {
+  setRocketSprite();
+  setEffectSprite();
+  setThrustSprite();
+  setMeteorSprite();
+}
+
 function setupGame() {
   frameRate(60);
+  initializeSprites();
   level = 1;
   backgroundImage = generateStarBackground();
   asteroidColliders = new Colliders("ASTEROID");
 
-  setRocketSprite();
-  setEffectSprite();
-  setMeteorSprite();
   createCanvas(window.innerWidth, window.innerHeight);
 
   asteroidColliders.set(
@@ -289,6 +268,7 @@ function setupGame() {
   rocket = new Rocket(vector(width / 2, height / 2), vector(0, 0), 100, {
     ship: shipSprite,
     projectile: effectSprite,
+    thrust: thrustSprite,
   });
   rocket.boundCheck = loopBounds;
 }

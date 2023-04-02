@@ -9,6 +9,7 @@ class Rocket {
   r;
   angleAcceleration = 0;
   deadreckonVector;
+  projectileSpeed = 1.8;
 
   speed = 0;
   startingFuel = 400;
@@ -18,7 +19,7 @@ class Rocket {
   fireRate = 200;
   fireInterval;
 
-  rotateFactor = 0.005;
+  rotateFactor = 0.003;
   thrustFactor = 0.08;
 
   projectiles = new Projectiles();
@@ -53,7 +54,7 @@ class Rocket {
     push();
     imageMode(CENTER);
     translate(this.location.x, this.location.y);
-    rotate(this.angle + 1.57);
+    rotate(this.angle - TWO_PI / 4);
     image(this.sprites.ship, 0, 0, 40, 40);
     pop();
   }
@@ -75,13 +76,25 @@ class Rocket {
     fill(255, 0, 0);
     text("Speed: " + this.speed, 10, 20);
     text("Projectiles: " + this.projectiles.length(), 80, 20);
-    text("Frame Rate: " + Math.floor(frameRate()), 160, 20);
+    // text("Frame Rate: " + Math.floor(frameRate()), 160, 20);
+    text("Frame Rate: " + averageFrameRate.toFixed(), 160, 20);
+    text("Lowest Frame Rate: " + lowestAverage.toFixed(), 250, 20);
+    pop();
+  }
+
+  drawThrust() {
+    push();
+    translate(this.location.x, this.location.y);
+    imageMode(CENTER);
+    rotate(this.angle - TWO_PI / 4);
+    image(this.sprites.thrust, 8, -25, 0, 0);
+    image(this.sprites.thrust, -8, -25, 0, 0);
     pop();
   }
 
   drawFuelBar() {
     push();
-    fill(255, 0, 0);
+    fill(76, 50, 168);
     rect(0, height - 10, map(this.fuel, 0, this.startingFuel, 0, width), 10);
     pop();
   }
@@ -91,6 +104,7 @@ class Rocket {
       this.acceleration.add(
         p5.Vector.fromAngle(this.angle).mult(this.thrustFactor)
       );
+      this.drawThrust();
       this.fuel -= 0.5;
     }
   }
@@ -121,7 +135,7 @@ class Rocket {
     if (!this.firing) {
       const p = new Mover(
         this.location.copy(),
-        p5.Vector.fromAngle(this.angle),
+        p5.Vector.fromAngle(this.angle).mult(this.projectileSpeed),
         this.sprites.projectile
       );
 
@@ -132,13 +146,11 @@ class Rocket {
       this.fireInterval = setInterval(() => {
         const p = new Mover(
           this.location.copy(),
-          p5.Vector.fromAngle(this.angle),
+          p5.Vector.fromAngle(this.angle).mult(this.projectileSpeed),
           this.sprites.projectile
-        )
-        p.setTag()
-        this.projectiles.add(
-          p
         );
+        p.setTag();
+        this.projectiles.add(p);
       }, this.fireRate);
     }
   }
