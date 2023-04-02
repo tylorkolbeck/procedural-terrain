@@ -42,7 +42,6 @@ class Rocket {
 
   draw() {
     this.drawShip();
-    this.drawHud();
     this.drawFuelBar();
 
     if (DEBUG) {
@@ -56,16 +55,7 @@ class Rocket {
     translate(this.location.x, this.location.y);
     rotate(this.angle + 1.57);
     image(this.sprites.ship, 0, 0, 40, 40);
-    // triangle(-this.r, -this.r / 2, -this.r, this.r / 2, this.r, 0);
     pop();
-    // push()
-    // imageMode(CENTER);
-
-    // translate(this.location.x, this.location.y);
-    // rotate(PI / 4);
-    // image(this.sprite, 0, 0, 40, 40);
-
-    // pop()
   }
 
   drawDeadReckon() {
@@ -183,8 +173,8 @@ class Rocket {
 
   drawDebug() {
     this.drawDeadReckon();
-
     this.drawHitbox();
+    this.drawHud();
   }
 
   drawHitbox() {
