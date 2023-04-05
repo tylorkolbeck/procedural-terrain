@@ -1,5 +1,5 @@
 class Rocket {
-  location;
+  position;
   velocity;
   acceleration;
   angle = PI / 2;
@@ -29,8 +29,8 @@ class Rocket {
 
   hitBoxRadius;
 
-  constructor(location, velocity, mass, sprites) {
-    this.location = location.copy();
+  constructor(position, velocity, mass, sprites) {
+    this.position = position.copy();
     this.velocity = velocity ? velocity : vector(0, 0);
     this.acceleration = vector(0, 0);
     this.mass = mass;
@@ -53,7 +53,7 @@ class Rocket {
   drawShip() {
     push();
     imageMode(CENTER);
-    translate(this.location.x, this.location.y);
+    translate(this.position.x, this.position.y);
     rotate(this.angle - TWO_PI / 4);
     image(this.sprites.ship, 0, 0, 40, 40);
     pop();
@@ -63,8 +63,8 @@ class Rocket {
     push();
     stroke(255, 0, 0);
     line(
-      this.location.x,
-      this.location.y,
+      this.position.x,
+      this.position.y,
       this.deadreckonVector.x,
       this.deadreckonVector.y
     );
@@ -84,7 +84,7 @@ class Rocket {
 
   drawThrust() {
     push();
-    translate(this.location.x, this.location.y);
+    translate(this.position.x, this.position.y);
     imageMode(CENTER);
     rotate(this.angle - TWO_PI / 4);
     image(this.sprites.thrust, 8, -25, 0, 0);
@@ -134,7 +134,7 @@ class Rocket {
   fireProjectile() {
     if (!this.firing) {
       const p = new Mover(
-        this.location.copy(),
+        this.position.copy(),
         p5.Vector.fromAngle(this.angle).mult(this.projectileSpeed),
         this.sprites.projectile
       );
@@ -145,7 +145,7 @@ class Rocket {
       this.firing = true;
       this.fireInterval = setInterval(() => {
         const p = new Mover(
-          this.location.copy(),
+          this.position.copy(),
           p5.Vector.fromAngle(this.angle).mult(this.projectileSpeed),
           this.sprites.projectile
         );
@@ -162,16 +162,16 @@ class Rocket {
 
   update() {
     this.velocity.add(this.acceleration);
-    this.location.add(this.velocity);
+    this.position.add(this.velocity);
     this.angle += this.angleAcceleration;
     this.speed = Math.floor(this.velocity.mag() * 100);
-    this.deadreckonVector = this.velocity.copy().mult(20).add(this.location);
+    this.deadreckonVector = this.velocity.copy().mult(20).add(this.position);
 
     this.angleAcceleration = 0;
     this.acceleration.set(0, 0);
 
     if (this.boundCheck) {
-      this.boundCheck(this.location);
+      this.boundCheck(this.position);
     }
 
     this.applyDrag();
@@ -193,7 +193,7 @@ class Rocket {
     push();
     stroke(color(255, 100, 0));
     noFill();
-    ellipse(this.location.x, this.location.y, this.hitBoxRadius);
+    ellipse(this.position.x, this.position.y, this.hitBoxRadius);
     pop();
   }
 }

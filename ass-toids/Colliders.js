@@ -24,7 +24,7 @@ class Colliders {
 
   checkCollision(other, cb) {
     for (let [colliderId, collider] of this.colliders) {
-      const distance = p5.Vector.sub(collider.position, other.location).mag();
+      const distance = p5.Vector.sub(collider.position, other.position).mag();
       const combinedRadius = (collider.hitbox.radius / 2) + (other.hitBoxRadius / 2);
       if (distance <= combinedRadius) {
         if (cb)  {

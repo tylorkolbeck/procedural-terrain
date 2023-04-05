@@ -6,7 +6,7 @@ let vector;
 let DEBUG = true;
 
 let toids;
-const numToids = 6;
+const numToids = 1;
 
 let level = 1;
 
@@ -26,6 +26,10 @@ let asteroidSpeedFactor = 1;
 let asteroidColliders;
 
 let gameOver = false;
+
+let wandererSprite;
+const NUM_WANDERERS = 10;
+const wanderers = [];
 
 function preload() {
   vector = createVector;
@@ -78,6 +82,11 @@ function setMeteorSprite() {
   toidSprite = spriteSheet.get(sLoc.x, sLoc.y, sLoc.width, sLoc.height);
 }
 
+function setWandererSprite() {
+  const sLoc = spriteData.sprites.find((s) => s.name === "spaceShips_006.png");
+  wandererSprite = spriteSheet.get(sLoc.x, sLoc.y, sLoc.width, sLoc.height);
+}
+
 function setup() {
   createCanvas(1200, 1200);
   frameRate(60);
@@ -99,13 +108,17 @@ function trackFrameRate(frameRate) {
 
   if (frameRates.length > averageOver) {
     frameRates.shift();
-    frameRates.push(frameRate)
+    frameRates.push(frameRate);
   } else {
     frameRates.push(frameRate);
   }
 
   averageFrameRate = frameRates.reduce((a, b) => a + b, 0) / frameRates.length;
-  if (averageFrameRate < lowestAverage && averageFrameRate > 0 && frameRates.length > averageOver) {
+  if (
+    averageFrameRate < lowestAverage &&
+    averageFrameRate > 0 &&
+    frameRates.length > averageOver
+  ) {
     lowestAverage = averageFrameRate;
   }
 }
@@ -128,7 +141,19 @@ function draw() {
       generateAsteroids(numToids, toidSprite, asteroidSpeedFactor)
     );
   }
+
   renderGameObjects(asteroidColliders.colliders);
+
+  for (let w of wanderers) {
+    wrapEdges(w);
+    w.wander();
+    w.render();
+
+    const distanceToRocket = p5.Vector.sub(rocket.position, w.position);
+    if (distanceToRocket.mag() < 300) {
+      w.applyForce(w.pursue(rocket, true));
+    }
+  }
 
   rocket.update();
   rocket.draw();
@@ -250,6 +275,7 @@ function initializeSprites() {
   setEffectSprite();
   setThrustSprite();
   setMeteorSprite();
+  setWandererSprite();
 }
 
 function setupGame() {
@@ -261,6 +287,8 @@ function setupGame() {
 
   createCanvas(window.innerWidth, window.innerHeight);
 
+  generateWanderers();
+
   asteroidColliders.set(
     generateAsteroids(numToids, toidSprite, asteroidSpeedFactor)
   );
@@ -271,4 +299,29 @@ function setupGame() {
     thrust: thrustSprite,
   });
   rocket.boundCheck = loopBounds;
+}
+
+function generateWanderers() {
+  for (let i = 0; i < NUM_WANDERERS; i++) {
+    const v = new Vehicle(
+      p5.Vector.random2D(CANVAS_WIDTH, CANVAS_HEIGHT),
+      0,
+      40,
+      p5.Vector.random2D()
+    );
+    wanderers.push(v);
+    v.setSprite(wandererSprite);
+  }
+}
+
+function wrapEdges(vehicle) {
+  if (vehicle.position.x > width) {
+    vehicle.position.x = 0 + vehicle.scale;
+  } else if (vehicle.position.x < 0) {
+    vehicle.position.x = width;
+  } else if (vehicle.position.y > height) {
+    vehicle.position.y = 0 + vehicle.scale;
+  } else if (vehicle.position.y < 0) {
+    vehicle.position.y = height;
+  }
 }
