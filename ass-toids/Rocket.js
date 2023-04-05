@@ -12,7 +12,7 @@ class Rocket {
   projectileSpeed = 1.8;
 
   speed = 0;
-  startingFuel = 400;
+  startingFuel = 10000;
   fuel = 0;
 
   firing = false;

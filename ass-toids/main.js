@@ -6,7 +6,7 @@ let vector;
 let DEBUG = true;
 
 let toids;
-const numToids = 1;
+const NUM_TOIDS = 0;
 
 let level = 1;
 
@@ -28,7 +28,7 @@ let asteroidColliders;
 let gameOver = false;
 
 let wandererSprite;
-const NUM_WANDERERS = 10;
+const NUM_WANDERERS = 20;
 const wanderers = [];
 
 function preload() {
@@ -125,7 +125,7 @@ function trackFrameRate(frameRate) {
 
 function draw() {
   background(0);
-  trackFrameRate(frameRate());
+  // trackFrameRate(frameRate());   
 
   if (gameOver) {
     frameRate(0);
@@ -134,11 +134,11 @@ function draw() {
   image(backgroundImage, 0, 0, width, height);
   checkKeyDowns();
 
-  if (asteroidColliders.colliders.size === 0) {
+  if (asteroidColliders.colliders.size < NUM_TOIDS) {
     level++;
     asteroidSpeedFactor += 0.2;
     asteroidColliders.set(
-      generateAsteroids(numToids, toidSprite, asteroidSpeedFactor)
+      generateAsteroids(NUM_TOIDS, toidSprite, asteroidSpeedFactor)
     );
   }
 
@@ -146,13 +146,18 @@ function draw() {
 
   for (let w of wanderers) {
     wrapEdges(w);
-    w.wander();
     w.render();
 
-    const distanceToRocket = p5.Vector.sub(rocket.position, w.position);
-    if (distanceToRocket.mag() < 300) {
+    // const distanceToRocket = p5.Vector.sub(rocket.position, w.position);
+    if (p5.Vector.sub(rocket.position, w.position).mag() < 300) {
       w.applyForce(w.pursue(rocket, true));
-    }
+    } 
+    // else {
+    // w.wander();
+
+    // }
+    // w.wander();
+
   }
 
   rocket.update();
@@ -290,7 +295,7 @@ function setupGame() {
   generateWanderers();
 
   asteroidColliders.set(
-    generateAsteroids(numToids, toidSprite, asteroidSpeedFactor)
+    generateAsteroids(NUM_TOIDS, toidSprite, asteroidSpeedFactor)
   );
 
   rocket = new Rocket(vector(width / 2, height / 2), vector(0, 0), 100, {
