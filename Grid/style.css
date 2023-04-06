@@ -1,0 +1,70 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: black;
+}
+
+#grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+#stage {
+  position: relative;
+}
+
+.element {
+  background: red;
+  position: absolute;
+  /* cursor: move; */
+  border: 1px solid black;
+  resize: both;
+    overflow: auto;
+}
+
+.resizer {
+  background: green;
+  /* width: 20px;
+  height: 20px; */
+}
+
+.resizable {
+  position: relative;
+}
+.resizer {
+  /* All resizers are positioned absolutely inside the element */
+  position: absolute;
+}
+
+/* Placed at the right side */
+.resizer-r {
+  cursor: col-resize;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: 5px;
+}
+
+/* Placed at the bottom side */
+.resizer-b {
+  bottom: 0;
+  cursor: row-resize;
+  height: 5px;
+  left: 0;
+  width: 100%;
+}
+
+.drag-handle {
+  background: pink;
+  cursor: move;
+  position: absolute;
+  width: 20px;
+  height: 20px;
+}
