@@ -1,4 +1,8 @@
-const ZOOM = 1;
+// TODO: Need to take into consideration any margin or the position of the stage when
+// calculating the position of the element on the grid after drag and resize
+
+
+const scale = 1;
 const WIDTH = 800;
 const HEIGHT = 800;
 const NUM_CELLS = 50;
@@ -62,8 +66,8 @@ function init() {
 }
 
 function drawStage() {
-  stage$.style.width = WIDTH * ZOOM + "px";
-  stage$.style.height = HEIGHT * ZOOM + "px";
+  stage$.style.width = WIDTH * scale + "px";
+  stage$.style.height = HEIGHT * scale + "px";
   stage$.style.border = "1px solid black";
 }
 
@@ -72,8 +76,8 @@ function renderElement(el) {
   const el$ = document.createElement("div");
   el$.classList.add("element");
   el$.id = el.id;
-  el$.style.width = el.cols * CELLSIZE * ZOOM + "px";
-  el$.style.height = el.rows * CELLSIZE * ZOOM + "px";
+  el$.style.width = el.cols * CELLSIZE * scale + "px";
+  el$.style.height = el.rows * CELLSIZE * scale + "px";
   el$.style.position = "absolute";
 
   //position to closest cell boundary
@@ -102,8 +106,8 @@ function renderElement(el) {
   el.location.x = leftLocation;
   el.location.y = topLocation;
 
-  el$.style.left = el.location.x * ZOOM + "px";
-  el$.style.top = el.location.y * ZOOM + "px";
+  el$.style.left = el.location.x * scale + "px";
+  el$.style.top = el.location.y * scale + "px";
   // make draggable
   // el$.setAttribute("draggable", true);
   stage$.appendChild(el$);
@@ -178,11 +182,11 @@ function drawGridCells(gridEl) {
     for (let j = 0; j < gridEl.cols; j++) {
       const cell$ = document.createElement("div");
       cell$.classList.add("cell");
-      cell$.style.width = CELLSIZE * ZOOM + "px";
-      cell$.style.height = CELLSIZE * ZOOM + "px";
+      cell$.style.width = CELLSIZE * scale + "px";
+      cell$.style.height = CELLSIZE * scale + "px";
       cell$.style.position = "absolute";
-      cell$.style.left = j * CELLSIZE * ZOOM + "px";
-      cell$.style.top = i * CELLSIZE * ZOOM + "px";
+      cell$.style.left = j * CELLSIZE * scale + "px";
+      cell$.style.top = i * CELLSIZE * scale + "px";
       cell$.style.border = "1px solid #ccc";
       gridEl.appendChild(cell$);
     }
@@ -247,15 +251,42 @@ const mouseUpHandler = function () {
 //   gridHeight: CELLSIZE,
 //   snapToGrid: true // enable snap to grid
 // })
-
-const el6 = document.getElementById("el6");
 const container = document.getElementById("stage");
-makeDraggable(el6, { container, contain: true, snapToGrid: true, cellSize: CELLSIZE });
-makeResizable(el6)
+const draggables = document.querySelectorAll(".element");
+draggables.forEach((el) => {
+  makeDraggable(el, {
+    container,
+    contain: true,
+    snapToGrid: true,
+    cellSize: CELLSIZE,
+  });
 
+  makeResizable(el, {
+    snapToGrid: true,
+    cellSize: CELLSIZE,
+    contain: true,
+    container: stage,
+  });
+});
 
-{/* <div class="resizer resizer-r"></div>
-<div class="resizer resizer-b"></div> */}
+// const el6 = document.getElementById("el6");
+// makeDraggable(el6, {
+//   container,
+//   contain: true,
+//   snapToGrid: true,
+//   cellSize: CELLSIZE,
+// });
+makeResizable(el6, {
+  snapToGrid: true,
+  cellSize: CELLSIZE,
+  contain: true,
+  container: stage,
+});
+
+{
+  /* <div class="resizer resizer-r"></div>
+<div class="resizer resizer-b"></div> */
+}
 // Returns a dom element by id
 function $(id) {
   return document.getElementById(id);

@@ -130,7 +130,7 @@ function makeDraggable(element, options) {
   dragHandle.addEventListener("mouseup", dragEnd);
   document.addEventListener("mousemove", drag);
 
-  // document.addEventListener("mouseleave", dragEnd);
+  document.addEventListener("mouseleave", dragEnd);
 
   function dragStart(e) {
     e.preventDefault();
@@ -184,24 +184,15 @@ function makeDraggable(element, options) {
   }
 }
 
-// if (snapToGrid) {
-//   const snappedPos = calculateSnapToGrid(cellSize, { x: xOffset, y: yOffset });
-//   console.log(snappedPos, xOffset, yOffset);
-//   element.style.left = snappedPos.x + "px";
-//   element.style.top = snappedPos.y + "px";
-// } else {
-//   element.style.left = currentX + "px";
-//   element.style.top = currentY + "px";
-// }
-
 function calculateSnapToGrid(cellSize, position) {
   const x = Math.round(position.x / cellSize) * cellSize;
   const y = Math.round(position.y / cellSize) * cellSize;
   return { x, y };
 }
 
-function makeResizable(element) {
-  element.classList.add('resizable')
+function makeResizable(element, options) {
+  const { snapToGrid = false, cellSize = 50, contain = false, container = null } = options;
+  element.classList.add("resizable");
 
   const rHandle = document.createElement("div");
   rHandle.classList.add("resizer", "resizer-r");
@@ -217,9 +208,12 @@ function makeResizable(element) {
   let w = 0;
   let h = 0;
 
+  handleInDrag = null;
+
   // Handle the mousedown event
   // that's triggered when user drags the resizer
   const mouseDownHandler = function (e) {
+    handleInDrag = e.target.classList.contains("resizer-r") ? "r" : "b";
     // Get the current mouse position
     x = e.clientX;
     y = e.clientY;
@@ -234,17 +228,84 @@ function makeResizable(element) {
     document.addEventListener("mouseup", mouseUpHandler);
   };
 
-  const mouseMoveHandler = function (e) {
-    // How far the mouse has been moved
-    const dx = e.clientX - x;
-    const dy = e.clientY - y;
+  // const mouseMoveHandler = function (e) {
+  //   let newX = e.clientX;
+  //   let newY = e.clientY;
 
-    // Adjust the dimension of element
-    element.style.width = `${w + dx}px`;
-    element.style.height = `${h + dy}px`;
+  //   if (snapToGrid) {
+  //     const snappedPos = calculateSnapToGrid(cellSize, {
+  //       x: e.clientX,
+  //       y: e.clientY,
+  //     });
+  //     newX = snappedPos.x;
+  //     newY = snappedPos.y;
+  //   }
+
+  //   const dx = newX - x;
+  //   const dy = newY - y;
+
+  //   if (handleInDrag === "r") {
+  //     element.style.width = `${w + dx}px`;
+  //   }
+
+  //   if (handleInDrag === "b") {
+  //     element.style.height = `${h + dy}px`;
+  //   }
+  // };
+
+
+  const mouseMoveHandler = function (e) {
+    let newX = e.clientX;
+    let newY = e.clientY;
+  
+    if (snapToGrid) {
+      const snappedPos = calculateSnapToGrid(cellSize, {
+        x: e.clientX,
+        y: e.clientY,
+      });
+      newX = snappedPos.x;
+      newY = snappedPos.y;
+    }
+  
+    const dx = newX - x;
+    const dy = newY - y;
+  
+    if (handleInDrag === "r") {
+      const newWidth = w + dx;
+      if (contain && container) {
+        const maxWidth = container.clientWidth - element.offsetLeft;
+        if (newWidth > maxWidth) {
+          element.style.width = `${maxWidth}px`;
+          return;
+        }
+      }
+      if (newWidth < cellSize) {
+        element.style.width = `${cellSize}px`;
+      } else {
+        element.style.width = `${newWidth}px`;
+      }
+    }
+  
+    if (handleInDrag === "b") {
+      const newHeight = h + dy;
+      if (contain && container) {
+        const maxHeight = container.clientHeight - element.offsetTop;
+        if (newHeight > maxHeight) {
+          element.style.height = `${maxHeight}px`;
+          return;
+        }
+      }
+      if (newHeight < cellSize) {
+        element.style.height = `${cellSize}px`;
+      } else {
+        element.style.height = `${newHeight}px`;
+      }
+    }
   };
 
+  
   const mouseUpHandler = function () {
+    handleInDrag = null;
     // Remove the handlers of `mousemove` and `mouseup`
     document.removeEventListener("mousemove", mouseMoveHandler);
     document.removeEventListener("mouseup", mouseUpHandler);

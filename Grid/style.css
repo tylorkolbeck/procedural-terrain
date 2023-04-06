@@ -17,6 +17,7 @@ body {
 }
 
 #stage {
+  /* margin: 50px; */
   position: relative;
 }
 
@@ -30,17 +31,20 @@ body {
 }
 
 .resizer {
-  background: green;
-  /* width: 20px;
-  height: 20px; */
+  /* background: green; */
 }
 
 .resizable {
   position: relative;
+  resize: none;
 }
 .resizer {
   /* All resizers are positioned absolutely inside the element */
   position: absolute;
+}
+
+.resizer:hover {
+  background: dodgerblue;
 }
 
 /* Placed at the right side */
@@ -49,22 +53,26 @@ body {
   height: 100%;
   right: 0;
   top: 0;
-  width: 5px;
+  width: 2px;
 }
 
 /* Placed at the bottom side */
 .resizer-b {
-  bottom: 0;
+  bottom: 0px;
   cursor: row-resize;
-  height: 5px;
   left: 0;
   width: 100%;
+  height: 2px;
 }
 
 .drag-handle {
   background: pink;
   cursor: move;
   position: absolute;
-  width: 20px;
-  height: 20px;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  /* width: 20px;
+  height: 20px; */
 }
